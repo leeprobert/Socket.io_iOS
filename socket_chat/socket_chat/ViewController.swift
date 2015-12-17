@@ -9,14 +9,13 @@
 import UIKit
 import Socket_IO_Client_Swift
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
 
     @IBOutlet weak var inputTextField: UITextField!
     @IBOutlet weak var messagesTableView: UITableView!
     
     var messages = [String]()
-    
-    let socket = SocketIOClient(socketURL: "localhost:3000")
+    let socket = SocketIOClient(socketURL: "http://wld-mbp-20s-macbook-pro.local:3000")
     
     @IBAction func sendHandler(sender: AnyObject) {
         
@@ -29,13 +28,14 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         super.viewDidLoad()
         
         socket.connect()
-        
         socket.on("chat message") {[weak self] data, ack in
          
             // add new message to array of messages and redraw table
-            self!.messages.append(String(data))
+            self!.messages.append(String(data[0]))
             self!.messagesTableView.reloadData()
             self!.inputTextField.text = ""
+            
+            print(self!.messages)
             return
         }
     }
@@ -57,6 +57,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return messages.count
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        
+        sendHandler(inputTextField)
+        inputTextField.resignFirstResponder()
+        return false
     }
 
 }
